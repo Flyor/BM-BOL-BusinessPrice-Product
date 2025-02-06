@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         BM Bol Business Produktseite
 // @namespace    http://tampermonkey.net/
-// @version      0.9
-// @description  Fügt oberhalb des Divs mit dem Bild "Nach Shop filtern" ein h2-Element ein, das den um 12 % reduzierten bol.de-Preis (Shop 439) anzeigt. Wird der Preis gefunden und enthält er den Zusatz "[Code]", wird "BOL Business: Code" ausgegeben. Wird der Shop nicht gefunden, erscheint "BOL Business: Nicht verfügbar".
+// @version      1.0
+// @description  Anzeige BOL BusinessPrice auf BM Produktseite
 // @updateURL    https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @downloadURL  https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @match        https://www.brickmerge.de/*
+//@author        Stonehiller Industries
 // @grant        none
 // ==/UserScript==
 
