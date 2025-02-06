@@ -6,7 +6,7 @@
 // @updateURL    https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @downloadURL  https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @match        https://www.brickmerge.de/*
-//@author        Stonehiller Industries
+// @author       Stonehiller Industries
 // @grant        none
 // ==/UserScript==
 
