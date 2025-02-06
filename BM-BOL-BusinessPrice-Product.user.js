@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BM Bol Business Produktseite
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Anzeige BOL BusinessPrice auf BM Produktseite
 // @updateURL    https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @downloadURL  https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
@@ -38,7 +38,7 @@ window.addEventListener("load", function() {
                 if (matchPrice) {
                     var priceStr = matchPrice[1];
                     var priceNum = parseFloat(priceStr.replace(',', '.'));
-                    var discounted = priceNum * 0.88; // 12 % Rabatt: 88 % des Originalpreises
+                    var discounted = priceNum * 0.87; // 13 % Rabatt: 87 % des Originalpreises
                     var discountedStr = discounted.toFixed(2).replace('.', ',');
                     newText = "BOL Business: " + discountedStr + " €";
 
