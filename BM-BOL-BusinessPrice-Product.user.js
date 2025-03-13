@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         BM Bol Business Produktseite
-// @namespace    http://tampermonkey.net/
-// @version      1.1
+// @namespace    https://brickmerge.de/
+// @version      1.2
 // @description  Anzeige BOL BusinessPrice auf BM Produktseite
 // @updateURL    https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @downloadURL  https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @match        https://www.brickmerge.de/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=brickmerge.de
 // @author       Stonehiller Industries
 // @grant        none
 // ==/UserScript==
