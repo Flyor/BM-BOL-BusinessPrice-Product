@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BM Bol Business + ST auf Produktseite
 // @namespace    https://brickmerge.de/
-// @version      2.0.0
+// @version      2.1.0
 // @description  Anzeige BOL BusinessPrice und ST Preis auf BM Produktseite
 // @updateURL    https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @downloadURL  https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
@@ -14,24 +14,61 @@
 (function() {
     'use strict';
 
-    // Funktion zum Anzeigen der Preise
-    function displayPrices() {
-        setTimeout(function() {
-            var refImg = document.querySelector('div.medium-1.small-3.columns.text-center img[alt="Nach Shop filtern"]');
-            if (!refImg) {
-                console.error("Referenzelement (Bild 'Nach Shop filtern') nicht gefunden.");
+    let priceDisplayExists = false;
+    let retryCount = 0;
+    const maxRetries = 10;
+
+    // Funktion zum Warten auf Elemente mit Retry-Logik
+    function waitForElement(selector, timeout = 5000) {
+        return new Promise((resolve, reject) => {
+            const element = document.querySelector(selector);
+            if (element) {
+                resolve(element);
                 return;
             }
-            var refDiv = refImg.parentNode;
-            console.log("Referenz-Div gefunden:", refDiv);
 
+            const observer = new MutationObserver(() => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    observer.disconnect();
+                    resolve(element);
+                }
+            });
+
+            observer.observe(document.body, { childList: true, subtree: true });
+
+            setTimeout(() => {
+                observer.disconnect();
+                reject(new Error(`Element ${selector} nicht gefunden nach ${timeout}ms`));
+            }, timeout);
+        });
+    }
+
+    // Funktion zum Anzeigen der Preise
+    function displayPrices() {
+        // Prüfen ob Dialog bereits existiert
+        if (priceDisplayExists || document.querySelector('#bm-price-display')) {
+            console.debug("Preis-Display bereits vorhanden");
+            return;
+        }
+
+        retryCount++;
+        console.debug(`Versuche Preise anzuzeigen (Versuch ${retryCount}/${maxRetries})`);
+
+        // Warten auf das Referenzelement
+        waitForElement('div.medium-1.small-3.columns.text-center img[alt="Nach Shop filtern"]', 3000)
+        .then(refImg => {
+            var refDiv = refImg.parentNode;
+            console.debug("Referenz-Div gefunden:", refDiv);
+
+            // BOL Preis ermitteln
             var bolElem = document.querySelector('[data-mid="439"] .price');
             var bolText = "";
             if (bolElem) {
-                console.log("bol.de Preis-Element gefunden:", bolElem);
+                console.debug("bol.de Preis-Element gefunden:", bolElem);
                 var priceText = bolElem.textContent;
                 if (priceText.includes("[Code]")) {
-                    console.log("Zusatz '[Code]' gefunden im Preistext.");
+                    console.debug("Zusatz '[Code]' gefunden im Preistext.");
                     bolText = "BOL Business: Code";
                 } else {
                     var matchPrice = priceText.match(/(\d+,\d+)/);
@@ -45,7 +82,7 @@
                         var uvpParagraph = Array.from(document.getElementsByTagName("p"))
                             .find(p => p.textContent.includes("UVP:"));
                         if (uvpParagraph) {
-                            console.log("UVP-Paragraf gefunden:", uvpParagraph);
+                            console.debug("UVP-Paragraf gefunden:", uvpParagraph);
                             var matchUvp = uvpParagraph.textContent.match(/UVP:\s*([\d,]+)\s*€/);
                             if (matchUvp) {
                                 var uvpStr = matchUvp[1];
@@ -55,10 +92,10 @@
                                     bolText += `Rabatt: ${discountPercent}%`;
                                 }
                             } else {
-                                console.warn("Kein UVP-Preis im UVP-Paragraph gefunden.");
+                                console.debug("Kein UVP-Preis im UVP-Paragraph gefunden.");
                             }
                         } else {
-                            console.warn("UVP-Paragraph nicht gefunden.");
+                            console.debug("UVP-Paragraph nicht gefunden.");
                         }
                     } else {
                         bolText = "BOL Business: Nicht verfügbar";
@@ -67,58 +104,186 @@
             } else {
                 bolText = "BOL Business: Nicht verfügbar";
             }
-            console.log("BOL Text:", bolText);
+            console.debug("BOL Text:", bolText);
 
+            // Produktnummer extrahieren - verschiedene URL-Formate unterstützen
             const url = window.location.href;
-            const productNumberMatch = url.match(/\/(\d{5})-/);
-            if (!productNumberMatch) return;
-
-            const productNumber = productNumberMatch[1];
+            let productNumber = null;
+            
+            // Standard Format: /12345-1_name
+            let productNumberMatch = url.match(/\/(\d{4,5})-\d+_/);
+            if (productNumberMatch) {
+                productNumber = productNumberMatch[1];
+            } else {
+                // Alternatives Format: nur /12345-
+                productNumberMatch = url.match(/\/(\d{4,5})-/);
+                if (productNumberMatch) {
+                    productNumber = productNumberMatch[1];
+                }
+            }
+            
+            if (!productNumber) {
+                console.debug("Keine gültige Produktnummer in URL gefunden:", url);
+                createPriceDisplay(bolText, "SmythsToys: Produktnummer nicht erkannt");
+                return;
+            }
+            
+            console.debug("Produktnummer gefunden:", productNumber);
+            
+            // SmythsToys durchsuchen
             const searchUrl = `https://www.smythstoys.com/de/de-de/search?text=lego+${productNumber}`;
+            console.debug("SmythsToys Suche:", searchUrl);
 
             GM_xmlhttpRequest({
                 method: 'GET',
                 url: searchUrl,
+                timeout: 10000,
                 onload: function(response) {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(response.responseText, 'text/html');
-                    const productTitleElement = doc.querySelector('div[data-test="card-title"] h2');
-                    const priceElement = doc.querySelector('.ios-price .text-price-lg');
-                    const priceTextElement = doc.querySelector('.ios-price .notranslate');
-                    const discountElement = doc.querySelector('.decal.inline-flex.text-white');
-
-                    let smythsText = "";
-                    if (productTitleElement && productTitleElement.textContent.includes(productNumber)) {
-                        if (priceElement && priceTextElement) {
-                            const price = priceElement.textContent.trim();
-                            const priceText = priceTextElement.textContent.trim();
-                            const discount = discountElement ? discountElement.textContent.trim().match(/-(\d+)%/)[1] : '0';
-
-                            smythsText = `SmythsToys Preis: ${price}${priceText} <br> Rabatt: ${discount}% <br> <a href="${searchUrl}" style="color: #bb1d29;" target="_blank">Zu SmythsToys</a>`;
-                        }
-                    } else {
-                        smythsText = "SmythsToys: Nicht verfügbar";
+                    console.debug("SmythsToys Response Status:", response.status);
+                    
+                    if (response.status !== 200) {
+                        createPriceDisplay(bolText, "SmythsToys: Fehler beim Laden");
+                        return;
                     }
 
-                    const priceDisplay = document.createElement('div');
-                    priceDisplay.style.position = 'fixed';
-                    priceDisplay.style.top = '100px';
-                    priceDisplay.style.right = '10px';
-                    priceDisplay.style.backgroundColor = 'black';
-                    priceDisplay.style.color = 'white';
-                    priceDisplay.style.border = '1px solid white';
-                    priceDisplay.style.padding = '10px';
-                    priceDisplay.style.zIndex = '1000';
-                    priceDisplay.innerHTML = bolText + '<hr style="border: 1px solid white; margin: 10px 0;">' + smythsText;
+                    try {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(response.responseText, 'text/html');
+                        
+                        // Verschiedene Selektoren für Produkttitel versuchen
+                        const titleSelectors = [
+                            'div[data-test="card-title"] h2',
+                            '.product-name h2',
+                            '.product-title',
+                            'h2[data-test="product-title"]'
+                        ];
+                        
+                        let productTitleElement = null;
+                        for (const selector of titleSelectors) {
+                            productTitleElement = doc.querySelector(selector);
+                            if (productTitleElement) break;
+                        }
 
-                    document.body.appendChild(priceDisplay);
+                        // Verschiedene Selektoren für Preise versuchen
+                        const priceSelectors = [
+                            '.ios-price .text-price-lg',
+                            '.price .current-price',
+                            '.product-price .price',
+                            '[data-test="price"]'
+                        ];
+                        
+                        let priceElement = null;
+                        for (const selector of priceSelectors) {
+                            priceElement = doc.querySelector(selector);
+                            if (priceElement) break;
+                        }
+
+                        const priceTextElement = doc.querySelector('.ios-price .notranslate') || doc.querySelector('.currency');
+                        const discountElement = doc.querySelector('.decal.inline-flex.text-white') || doc.querySelector('.discount-badge');
+
+                        let smythsText = "";
+                        
+                        // Prüfen ob Produkt gefunden wurde
+                        if (productTitleElement && productTitleElement.textContent.includes(productNumber)) {
+                            if (priceElement) {
+                                const price = priceElement.textContent.trim();
+                                const priceText = priceTextElement ? priceTextElement.textContent.trim() : '';
+                                let discount = '0';
+                                
+                                if (discountElement) {
+                                    const discountMatch = discountElement.textContent.trim().match(/-?(\d+)%/);
+                                    if (discountMatch) discount = discountMatch[1];
+                                }
+
+                                smythsText = `SmythsToys Preis: ${price}${priceText}<br>Rabatt: ${discount}%<br><a href="${searchUrl}" style="color: #bb1d29;" target="_blank">Zu SmythsToys</a>`;
+                            } else {
+                                smythsText = `SmythsToys: Produkt gefunden, Preis nicht verfügbar<br><a href="${searchUrl}" style="color: #bb1d29;" target="_blank">Zu SmythsToys</a>`;
+                            }
+                        } else {
+                            smythsText = "SmythsToys: Nicht verfügbar";
+                        }
+                        
+                        createPriceDisplay(bolText, smythsText);
+                        
+                    } catch (error) {
+                        console.error("Fehler beim Parsen der SmythsToys-Antwort:", error);
+                        createPriceDisplay(bolText, "SmythsToys: Parsing-Fehler");
+                    }
+                },
+                onerror: function(error) {
+                    console.error("SmythsToys Request Fehler:", error);
+                    createPriceDisplay(bolText, "SmythsToys: Verbindungsfehler");
+                },
+                ontimeout: function() {
+                    console.error("SmythsToys Request Timeout");
+                    createPriceDisplay(bolText, "SmythsToys: Timeout");
                 }
             });
-        }, 2000);
+        })
+        .catch(error => {
+            console.debug("Fehler beim Warten auf Referenzelement:", error);
+            
+            // Fallback: Versuche es trotzdem mit den verfügbaren Informationen
+            if (retryCount < maxRetries) {
+                setTimeout(() => displayPrices(), 1000);
+            } else {
+                console.error("Max. Anzahl Versuche erreicht, zeige minimal Dialog");
+                createPriceDisplay("BOL Business: Seite noch nicht geladen", "SmythsToys: Seite noch nicht geladen");
+            }
+        });
+    }
+
+    // Hilfsfunktion zum Erstellen des Preis-Displays
+    function createPriceDisplay(bolText, smythsText) {
+        if (priceDisplayExists || document.querySelector('#bm-price-display')) {
+            console.debug("Preis-Display bereits vorhanden, überspringe");
+            return;
+        }
+
+        const priceDisplay = document.createElement('div');
+        priceDisplay.id = 'bm-price-display';
+        priceDisplay.style.position = 'fixed';
+        priceDisplay.style.top = '100px';
+        priceDisplay.style.right = '10px';
+        priceDisplay.style.backgroundColor = 'black';
+        priceDisplay.style.color = 'white';
+        priceDisplay.style.border = '1px solid white';
+        priceDisplay.style.padding = '10px';
+        priceDisplay.style.zIndex = '1000';
+        priceDisplay.style.borderRadius = '5px';
+        priceDisplay.style.fontFamily = 'Arial, sans-serif';
+        priceDisplay.style.fontSize = '12px';
+        priceDisplay.style.maxWidth = '300px';
+        priceDisplay.innerHTML = bolText + '<hr style="border: 1px solid white; margin: 10px 0;">' + smythsText;
+
+        document.body.appendChild(priceDisplay);
+        priceDisplayExists = true;
+        console.debug("Preis-Display erstellt und angezeigt");
     }
 
     // Funktion aufrufen, wenn die Seite geladen ist
     window.addEventListener("load", function() {
+        console.debug("Seite geladen, starte displayPrices");
         displayPrices();
     });
+
+    // Zusätzlich bei Navigation/URL-Änderungen (für SPA-Verhalten)
+    let lastUrl = location.href;
+    new MutationObserver(() => {
+        const url = location.href;
+        if (url !== lastUrl) {
+            lastUrl = url;
+            priceDisplayExists = false;
+            retryCount = 0;
+            
+            // Alten Dialog entfernen falls vorhanden
+            const oldDisplay = document.querySelector('#bm-price-display');
+            if (oldDisplay) {
+                oldDisplay.remove();
+            }
+            
+            console.debug("URL geändert, starte displayPrices neu");
+            setTimeout(() => displayPrices(), 1000);
+        }
+    }).observe(document, { subtree: true, childList: true });
 })();
