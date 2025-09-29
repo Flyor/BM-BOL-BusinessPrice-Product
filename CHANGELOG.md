@@ -5,6 +5,23 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt der [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2025-09-29
+
+### 🔧 Behoben
+- **SmythsToys-Rabatt-Berechnung**: Rabatt wird jetzt korrekt basierend auf UVP berechnet statt nur aus Discount-Element gelesen
+- **Immer 0% Rabatt Problem**: SmythsToys-Rabatt wird nun wie BOL Business-Rabatt berechnet (UVP vs. aktueller Preis)
+
+### ✨ Hinzugefügt
+- **Intelligente Rabatt-Berechnung**: SmythsToys-Rabatt wird aus UVP und SmythsToys-Preis errechnet
+- **Fallback-Mechanismus**: Wenn UVP-basierte Berechnung fehlschlägt, wird weiterhin das Discount-Element verwendet
+- **Erweiterte Debug-Ausgaben**: Rabatt-Berechnung wird in der Konsole protokolliert
+
+### 🔄 Geändert
+- **Rabatt-Logik**: SmythsToys verwendet jetzt dieselbe Berechnungsmethode wie BOL Business
+- **Preis-Parsing**: Verbesserte Extraktion von numerischen Werten aus SmythsToys-Preisen
+
+---
+
 ## [2.1.0] - 2025-09-29
 
 ### 🔧 Behoben

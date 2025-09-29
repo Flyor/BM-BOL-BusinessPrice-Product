@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BM Bol Business + ST auf Produktseite
 // @namespace    https://brickmerge.de/
-// @version      2.1.0
+// @version      2.1.1
 // @description  Anzeige BOL BusinessPrice und ST Preis auf BM Produktseite
 // @updateURL    https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @downloadURL  https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
@@ -190,7 +190,29 @@
                                 const priceText = priceTextElement ? priceTextElement.textContent.trim() : '';
                                 let discount = '0';
                                 
-                                if (discountElement) {
+                                // Rabatt berechnen basierend auf UVP (wie bei BOL Business)
+                                var uvpParagraph = Array.from(document.getElementsByTagName("p"))
+                                    .find(p => p.textContent.includes("UVP:"));
+                                if (uvpParagraph) {
+                                    var matchUvp = uvpParagraph.textContent.match(/UVP:\s*([\d,]+)\s*€/);
+                                    if (matchUvp) {
+                                        var uvpStr = matchUvp[1];
+                                        var uvpNum = parseFloat(uvpStr.replace(',', '.'));
+                                        
+                                        // SmythsToys Preis extrahieren und zu Zahl konvertieren
+                                        var priceMatch = price.match(/([\d,]+)/);
+                                        if (priceMatch && uvpNum > 0) {
+                                            var smythsPriceStr = priceMatch[1];
+                                            var smythsPriceNum = parseFloat(smythsPriceStr.replace(',', '.'));
+                                            var discountPercent = Math.round((1 - (smythsPriceNum / uvpNum)) * 100);
+                                            discount = discountPercent.toString();
+                                            console.debug(`SmythsToys Rabatt berechnet: UVP ${uvpNum}€, SmythsToys ${smythsPriceNum}€, Rabatt ${discount}%`);
+                                        }
+                                    }
+                                }
+                                
+                                // Fallback: Versuche Rabatt aus Discount-Element zu lesen
+                                if (discount === '0' && discountElement) {
                                     const discountMatch = discountElement.textContent.trim().match(/-?(\d+)%/);
                                     if (discountMatch) discount = discountMatch[1];
                                 }

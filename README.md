@@ -125,6 +125,6 @@ Bei Problemen oder Verbesserungsvorschlägen:
 
 ## 📜 Version
 
-Aktuelle Version: **2.1.0**
+Aktuelle Version: **2.1.1**
 
 Siehe [CHANGELOG.md](CHANGELOG.md) für detaillierte Änderungen.
