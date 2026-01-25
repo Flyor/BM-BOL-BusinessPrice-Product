@@ -5,6 +5,21 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt der [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2025-01-XX
+
+### 🔄 Geändert
+- **Shop-Umstellung**: Anpassung von bol.de auf buecher.de
+- **Text-Referenzen**: Alle "BOL" Texte wurden zu "Bücher.de" geändert
+- **Skript-Name**: Aktualisiert auf "BM Bücher.de Business + ST auf Produktseite"
+- **Beschreibung**: Angepasst für buecher.de Business-Preise
+- **Shop-ID**: Aktualisiert von `data-mid="439"` auf `data-mid="447"` für buecher.de
+
+### 📝 Hinweise
+- Die Shop-ID wurde auf 447 geändert, da buecher.de eine neue ID auf BrickMerge hat
+- Funktionalität bleibt vollständig erhalten, nur die Bezeichnungen und Shop-ID wurden angepasst
+
+---
+
 ## [2.1.1] - 2025-09-29
 
 ### 🔧 Behoben

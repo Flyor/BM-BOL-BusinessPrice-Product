@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BM Bol Business + ST auf Produktseite
+// @name         BM Bücher.de Business + ST auf Produktseite
 // @namespace    https://brickmerge.de/
-// @version      2.1.1
-// @description  Anzeige BOL BusinessPrice und ST Preis auf BM Produktseite
+// @version      2.1.2
+// @description  Anzeige Bücher.de BusinessPrice und ST Preis auf BM Produktseite
 // @updateURL    https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @downloadURL  https://github.com/Flyor/BM-BOL-BusinessPrice-Product/raw/refs/heads/main/BM-BOL-BusinessPrice-Product.user.js
 // @match        https://www.brickmerge.de/*
@@ -61,15 +61,15 @@
             var refDiv = refImg.parentNode;
             console.debug("Referenz-Div gefunden:", refDiv);
 
-            // BOL Preis ermitteln
-            var bolElem = document.querySelector('[data-mid="439"] .price');
+            // Bücher.de Preis ermitteln
+            var bolElem = document.querySelector('[data-mid="447"] .price');
             var bolText = "";
             if (bolElem) {
-                console.debug("bol.de Preis-Element gefunden:", bolElem);
+                console.debug("buecher.de Preis-Element gefunden:", bolElem);
                 var priceText = bolElem.textContent;
                 if (priceText.includes("[Code]")) {
                     console.debug("Zusatz '[Code]' gefunden im Preistext.");
-                    bolText = "BOL Business: Code";
+                    bolText = "Bücher.de Business: Code";
                 } else {
                     var matchPrice = priceText.match(/(\d+,\d+)/);
                     if (matchPrice) {
@@ -77,7 +77,7 @@
                         var priceNum = parseFloat(priceStr.replace(',', '.'));
                         var discounted = priceNum * 0.87;
                         var discountedStr = discounted.toFixed(2).replace('.', ',');
-                        bolText = `BOL Business Preis: ${discountedStr} €<br>`;
+                        bolText = `Bücher.de Business Preis: ${discountedStr} €<br>`;
 
                         var uvpParagraph = Array.from(document.getElementsByTagName("p"))
                             .find(p => p.textContent.includes("UVP:"));
@@ -98,13 +98,13 @@
                             console.debug("UVP-Paragraph nicht gefunden.");
                         }
                     } else {
-                        bolText = "BOL Business: Nicht verfügbar";
+                        bolText = "Bücher.de Business: Nicht verfügbar";
                     }
                 }
             } else {
-                bolText = "BOL Business: Nicht verfügbar";
+                bolText = "Bücher.de Business: Nicht verfügbar";
             }
-            console.debug("BOL Text:", bolText);
+            console.debug("Bücher.de Text:", bolText);
 
             // Produktnummer extrahieren - verschiedene URL-Formate unterstützen
             const url = window.location.href;
@@ -250,7 +250,7 @@
                 setTimeout(() => displayPrices(), 1000);
             } else {
                 console.error("Max. Anzahl Versuche erreicht, zeige minimal Dialog");
-                createPriceDisplay("BOL Business: Seite noch nicht geladen", "SmythsToys: Seite noch nicht geladen");
+                createPriceDisplay("Bücher.de Business: Seite noch nicht geladen", "SmythsToys: Seite noch nicht geladen");
             }
         });
     }

@@ -1,13 +1,13 @@
-# BM Bol Business + ST auf Produktseite
+# BM Bücher.de Business + ST auf Produktseite
 
-Ein Tampermonkey-Skript zur Anzeige von BOL Business-Preisen und SmythsToys-Preisen auf BrickMerge Produktseiten.
+Ein Tampermonkey-Skript zur Anzeige von Bücher.de Business-Preisen und SmythsToys-Preisen auf BrickMerge Produktseiten.
 
 ## 📋 Funktionen
 
-### BOL Business Preis
-- **Automatische Berechnung** des BOL Business-Preises (13% Rabatt auf den regulären BOL-Preis)
+### Bücher.de Business Preis
+- **Automatische Berechnung** des Bücher.de Business-Preises (13% Rabatt auf den regulären Bücher.de-Preis)
 - **UVP-Vergleich** mit prozentualem Rabatt gegenüber der unverbindlichen Preisempfehlung
-- **Code-Erkennung** für spezielle BOL-Angebote
+- **Code-Erkennung** für spezielle Bücher.de-Angebote
 
 ### SmythsToys Integration
 - **Automatische Produktsuche** auf SmythsToys basierend auf der LEGO Set-Nummer
@@ -45,13 +45,13 @@ Ein Tampermonkey-Skript zur Anzeige von BOL Business-Preisen und SmythsToys-Prei
 
 2. **Automatische Anzeige**:
    - Das Skript erkennt automatisch die LEGO Set-Nummer
-   - Berechnet den BOL Business-Preis
+   - Berechnet den Bücher.de Business-Preis
    - Sucht das Produkt bei SmythsToys
    - Zeigt beide Preise in einem Dialog an
 
 3. **Dialog-Inhalt**:
    ```
-   BOL Business Preis: XX,XX €
+   Bücher.de Business Preis: XX,XX €
    Rabatt: XX%
    ─────────────────────────
    SmythsToys Preis: XX,XX €
@@ -66,7 +66,7 @@ Ein Tampermonkey-Skript zur Anzeige von BOL Business-Preisen und SmythsToys-Prei
 - `/[4-5 Stellig]-` (Alternative)
 
 ### Selektoren
-- **BOL-Preis**: `[data-mid="439"] .price`
+- **Bücher.de-Preis**: `[data-mid="447"] .price`
 - **UVP**: Paragraph mit "UVP:" Text
 - **Referenzelement**: `div.medium-1.small-3.columns.text-center img[alt="Nach Shop filtern"]`
 
@@ -87,16 +87,16 @@ Ein Tampermonkey-Skript zur Anzeige von BOL Business-Preisen und SmythsToys-Prei
 - Netzwerkprobleme oder CORS-Beschränkungen
 - Seitenstruktur von SmythsToys hat sich geändert
 
-### BOL-Preis nicht erkannt
-- BOL ist möglicherweise nicht in der Shop-Liste
+### Bücher.de-Preis nicht erkannt
+- Bücher.de ist möglicherweise nicht in der Shop-Liste
 - Preisformat hat sich geändert
-- Shop-ID (439) ist nicht korrekt
+- Shop-ID (447) ist nicht korrekt
 
 ## 📊 Berechnungen
 
-### BOL Business Rabatt
+### Bücher.de Business Rabatt
 ```javascript
-Business-Preis = BOL-Preis × 0.87  // 13% Rabatt
+Business-Preis = Bücher.de-Preis × 0.87  // 13% Rabatt
 ```
 
 ### UVP-Rabatt
@@ -125,6 +125,6 @@ Bei Problemen oder Verbesserungsvorschlägen:
 
 ## 📜 Version
 
-Aktuelle Version: **2.1.1**
+Aktuelle Version: **2.1.2**
 
 Siehe [CHANGELOG.md](CHANGELOG.md) für detaillierte Änderungen.
